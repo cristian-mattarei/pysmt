@@ -35,7 +35,7 @@ class MSatInstaller(SolverInstaller):
             archive_name = archive_name.replace("windows-x86_64", "win64")
             archive_name = archive_name.replace("windows-x86", "win32")
             archive_name = archive_name.replace(".tar.gz", "-msvc.zip")
-            
+
         native_link = "http://mathsat.fbk.eu/download.php?file={archive_name}"
 
         SolverInstaller.__init__(self, install_dir=install_dir,
@@ -48,6 +48,14 @@ class MSatInstaller(SolverInstaller):
         self.python_bindings_dir = os.path.join(self.extract_path, "python")
 
     def compile(self):
+        if self.os_name == "windows":
+            deps_archive = os.path.join(self.base_dir, "deps.zip")
+            SolverInstaller.do_download("https://github.com/mikand/tamer-windows-deps/archive/master.zip", deps_archive)
+            SolverInstaller.unzip(deps_archive, self.base_dir)
+            deps_dir = os.path.join(self.base_dir, "tamer-windows-deps-master")
+            SolverInstaller.mv(os.path.join(deps_dir, "gmp/include/gmp.h"),
+                               self.python_bindings_dir)
+
         SolverInstaller.run_python("./setup.py build", self.python_bindings_dir)
 
     def move(self):
