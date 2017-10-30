@@ -31,6 +31,11 @@ class MSatInstaller(SolverInstaller):
                                                     self.architecture)
         if self.os_name == "darwin":
             archive_name = archive_name.replace("darwin", "darwin-libcxx")
+        if self.os_name == "windows":
+            archive_name = archive_name.replace("windows-x86_64", "win64")
+            archive_name = archive_name.replace("windows-x86", "win32")
+            archive_name = archive_name.replace(".tar.gz", "-msvc.zip")
+            
         native_link = "http://mathsat.fbk.eu/download.php?file={archive_name}"
 
         SolverInstaller.__init__(self, install_dir=install_dir,
