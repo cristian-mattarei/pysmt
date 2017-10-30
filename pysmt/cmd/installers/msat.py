@@ -54,7 +54,7 @@ class MSatInstaller(SolverInstaller):
             SolverInstaller.unzip(deps_archive, self.base_dir)
             deps_dir = os.path.join(self.base_dir, "tamer-windows-deps-master")
             SolverInstaller.mv(os.path.join(deps_dir, "gmp/include/gmp.h"),
-                               self.python_bindings_dir)
+                               os.path.join(self.python_bindings_dir, "../include"))
 
         SolverInstaller.run_python("./setup.py build", self.python_bindings_dir)
 
