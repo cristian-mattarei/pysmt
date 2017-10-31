@@ -55,8 +55,8 @@ class MSatInstaller(SolverInstaller):
 
             SolverInstaller.do_download("https://raw.githubusercontent.com/mikand/tamer-windows-deps/master/gmp/include/gmp.h", os.path.join(incdir, "gmp.h"))
 
-            SolverInstaller.do_download("https://github.com/Legrandin/mpir-windows-builds/blob/master/mpir-2.6.0_VS2008_32/mpir.dll?raw=true", os.path.join(libdir, "mpir.dll"))
-            SolverInstaller.do_download("https://github.com/Legrandin/mpir-windows-builds/blob/master/mpir-2.6.0_VS2008_32/mpir.lib?raw=true", os.path.join(libdir, "mpir.lib"))
+            SolverInstaller.do_download("https://github.com/Legrandin/mpir-windows-builds/blob/master/mpir-2.6.0_VS2015_%s/mpir.dll?raw=true" % self.bits, os.path.join(libdir, "mpir.dll"))
+            SolverInstaller.do_download("https://github.com/Legrandin/mpir-windows-builds/blob/master/mpir-2.6.0_VS2015_%s/mpir.lib?raw=true" % self.bits, os.path.join(libdir, "mpir.lib"))
 
             # Overwrite setup.py
             setup = """#!/usr/bin/env python 
@@ -87,10 +87,21 @@ setup(name='mathsat', version='0.1',
             with open(os.path.join(self.python_bindings_dir, "setup.py"), "w") as f:
                 f.write(setup)
                 f.write("\n")
-                
+
+            # Patching swig wrapper
+            key = "if (arg2) msat_free(arg2);"
+            subst = "if (arg2) free(arg2);"
+            c_body = None
+            with open(os.path.join(self.python_bindings_dir, "mathsat_python_wrap.c"), "r") as f:
+                c_body = f.read()
+            c_body = c_body.replace(key, subst)
+            with open(os.path.join(self.python_bindings_dir, "mathsat_python_wrap.c"), "w") as f:
+                f.write(c_body)
+        
         SolverInstaller.run_python("./setup.py build", self.python_bindings_dir)
-        SolverInstaller.mv(os.path.join(libdir, "mathsat.dll"), self.bindings_dir)
-        SolverInstaller.mv(os.path.join(libdir, "mpir.dll"), self.bindings_dir)
+        if self.os_name == "windows":
+            SolverInstaller.mv(os.path.join(libdir, "mathsat.dll"), self.bindings_dir)
+            SolverInstaller.mv(os.path.join(libdir, "mpir.dll"), self.bindings_dir)
 
     def move(self):
         pdir = self.python_bindings_dir
