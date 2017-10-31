@@ -16,6 +16,7 @@ import os
 import re
 import sys
 import platform
+import glob
 
 from pysmt.cmd.installers.base import SolverInstaller, TemporaryPath
 
@@ -53,7 +54,7 @@ class MSatInstaller(SolverInstaller):
             incdir = os.path.join(self.python_bindings_dir, "../include")
 
             SolverInstaller.do_download("https://raw.githubusercontent.com/mikand/tamer-windows-deps/master/gmp/include/gmp.h", os.path.join(incdir, "gmp.h"))
-            
+
             SolverInstaller.do_download("https://github.com/Legrandin/mpir-windows-builds/blob/master/mpir-2.6.0_VS2008_32/mpir.dll?raw=true", os.path.join(libdir, "mpir.dll"))
             SolverInstaller.do_download("https://github.com/Legrandin/mpir-windows-builds/blob/master/mpir-2.6.0_VS2008_32/mpir.lib?raw=true", os.path.join(libdir, "mpir.lib"))
 
@@ -92,17 +93,12 @@ setup(name='mathsat', version='0.1',
         SolverInstaller.mv(os.path.join(libdir, "mpir.dll"), self.bindings_dir)
 
     def move(self):
-        libdir = "lib.%s-%s-%s" % (self.os_name, self.architecture,
-                                   self.python_version)
-        if self.os_name == "darwin":
-            osx_version = ".".join(platform.mac_ver()[0].split(".")[:2])
-            libdir = libdir.replace("darwin", "macosx-%s" % osx_version)
         pdir = self.python_bindings_dir
         bdir = os.path.join(pdir, "build")
-        sodir = os.path.join(bdir, libdir)
+        sodir = glob.glob(bdir + "/lib.*")[0]
 
         for f in os.listdir(sodir):
-            if f.endswith(".so"):
+            if f.endswith(".so") or f.endswith(".pyd"):
                 SolverInstaller.mv(os.path.join(sodir, f), self.bindings_dir)
         SolverInstaller.mv(os.path.join(pdir, "mathsat.py"), self.bindings_dir)
 
