@@ -49,14 +49,47 @@ class MSatInstaller(SolverInstaller):
 
     def compile(self):
         if self.os_name == "windows":
-            deps_archive = os.path.join(self.base_dir, "deps.zip")
-            SolverInstaller.do_download("https://github.com/mikand/tamer-windows-deps/archive/master.zip", deps_archive)
-            SolverInstaller.unzip(deps_archive, self.base_dir)
-            deps_dir = os.path.join(self.base_dir, "tamer-windows-deps-master")
-            SolverInstaller.mv(os.path.join(deps_dir, "gmp/include/gmp.h"),
-                               self.python_bindings_dir)
+            libdir = os.path.join(self.python_bindings_dir, "../lib")
+            incdir = os.path.join(self.python_bindings_dir, "../include")
 
+            SolverInstaller.do_download("https://raw.githubusercontent.com/mikand/tamer-windows-deps/master/gmp/include/gmp.h", os.path.join(incdir, "gmp.h"))
+            
+            SolverInstaller.do_download("https://github.com/Legrandin/mpir-windows-builds/blob/master/mpir-2.6.0_VS2008_32/mpir.dll?raw=true", os.path.join(libdir, "mpir.dll"))
+            SolverInstaller.do_download("https://github.com/Legrandin/mpir-windows-builds/blob/master/mpir-2.6.0_VS2008_32/mpir.lib?raw=true", os.path.join(libdir, "mpir.lib"))
+
+            # Overwrite setup.py
+            setup = """#!/usr/bin/env python 
+
+import os, sys
+from setuptools import setup, Extension
+
+extra_compile_args = []
+extra_link_args = []
+
+MATHSAT_DIR = '..'
+
+libraries = ['mathsat', 'psapi', 'mpir']
+
+setup(name='mathsat', version='0.1',
+      description='MathSAT API',
+      ext_modules=[Extension('_mathsat', ['mathsat_python_wrap.c'],
+                             define_macros=[('SWIG','1')],
+                             include_dirs=[os.path.join(MATHSAT_DIR,
+                                                        'include')],
+                             library_dirs=[os.path.join(MATHSAT_DIR, 'lib')],
+                             extra_compile_args=extra_compile_args,
+                             extra_link_args=extra_link_args,
+                             libraries=libraries,
+                             language='c++',
+                             )]
+      ) """
+            with open(os.path.join(self.python_bindings_dir, "setup.py"), "w") as f:
+                f.write(setup)
+                f.write("\n")
+                
         SolverInstaller.run_python("./setup.py build", self.python_bindings_dir)
+        SolverInstaller.mv(os.path.join(libdir, "mathsat.dll"), self.bindings_dir)
+        SolverInstaller.mv(os.path.join(libdir, "mpir.dll"), self.bindings_dir)
 
     def move(self):
         libdir = "lib.%s-%s-%s" % (self.os_name, self.architecture,
