@@ -15,7 +15,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-import os
+import os, sys
 
 from pysmt.test import TestCase
 from pysmt.test import skipIfSolverNotAvailable
@@ -59,6 +59,10 @@ class PortfolioTestCase(TestCase):
     def test_smtlib_multi_msat(self):
         from pysmt.test.smtlib.parser_utils import SMTLIB_TEST_FILES, SMTLIB_DIR
 
+        # On some platforms the internal pickling process requires
+        # quite a lot of recursion...
+        sys.setrecursionlimit(9999999)
+        
         for (logic, f, expected_result) in SMTLIB_TEST_FILES:
             smtfile = os.path.join(SMTLIB_DIR, f)
             if logic <= QF_UFLIRA:
