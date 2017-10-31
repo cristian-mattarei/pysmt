@@ -87,7 +87,8 @@ setup(name='mathsat', version='0.1',
                 f.write(setup)
                 f.write("\n")
                 
-        SolverInstaller.run_python("./setup.py build", self.python_bindings_dir)
+        SolverInstaller.run_py
+        thon("./setup.py build", self.python_bindings_dir)
         SolverInstaller.mv(os.path.join(libdir, "mathsat.dll"), self.bindings_dir)
         SolverInstaller.mv(os.path.join(libdir, "mpir.dll"), self.bindings_dir)
 
