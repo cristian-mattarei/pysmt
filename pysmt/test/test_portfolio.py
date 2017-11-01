@@ -68,7 +68,6 @@ class PortfolioTestCase(TestCase):
             smtfile = os.path.join(SMTLIB_DIR, f)
             if logic <= QF_UFLIRA:
                 env = reset_env()
-                print smtfile
                 formula = get_formula_fname(smtfile, env)
                 with Portfolio([("msat", {"random_seed": 1}),
                                 ("msat", {"random_seed": 17}),
