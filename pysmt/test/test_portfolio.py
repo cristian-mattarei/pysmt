@@ -61,12 +61,14 @@ class PortfolioTestCase(TestCase):
 
         # On some platforms the internal pickling process requires
         # quite a lot of recursion...
-        sys.setrecursionlimit(9999999)
+        old_recursion_limit = sys.getrecursionlimit()
+        sys.setrecursionlimit(999999)
         
         for (logic, f, expected_result) in SMTLIB_TEST_FILES:
             smtfile = os.path.join(SMTLIB_DIR, f)
             if logic <= QF_UFLIRA:
                 env = reset_env()
+                print smtfile
                 formula = get_formula_fname(smtfile, env)
                 with Portfolio([("msat", {"random_seed": 1}),
                                 ("msat", {"random_seed": 17}),
@@ -77,6 +79,9 @@ class PortfolioTestCase(TestCase):
                                generate_models=False) as s:
                     res = s.is_sat(formula)
                     self.assertEqual(expected_result, res, smtfile)
+
+        #reset recursion limit
+        sys.setrecursionlimit(old_recursion_limit)
 
     def run_smtlib(self, smtfile, logic, expected_result):
         env = reset_env()
