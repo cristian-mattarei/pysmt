@@ -55,11 +55,11 @@ class MSatInstaller(SolverInstaller):
 
             SolverInstaller.do_download("https://raw.githubusercontent.com/mikand/tamer-windows-deps/master/gmp/include/gmp.h", os.path.join(incdir, "gmp.h"))
 
-            SolverInstaller.do_download("https://github.com/Legrandin/mpir-windows-builds/blob/master/mpir-2.6.0_VS2015_%s/mpir.dll?raw=true" % self.bits, os.path.join(libdir, "mpir.dll"))
-            SolverInstaller.do_download("https://github.com/Legrandin/mpir-windows-builds/blob/master/mpir-2.6.0_VS2015_%s/mpir.lib?raw=true" % self.bits, os.path.join(libdir, "mpir.lib"))
+            SolverInstaller.do_download("https://github.com/Legrandin/mpir-windows-builds/blob/master/mpir-2.6.0_VS2010_%s/mpir.dll?raw=true" % self.bits, os.path.join(libdir, "mpir.dll"))
+            SolverInstaller.do_download("https://github.com/Legrandin/mpir-windows-builds/blob/master/mpir-2.6.0_VS2010_%s/mpir.lib?raw=true" % self.bits, os.path.join(libdir, "mpir.lib"))
 
             # Overwrite setup.py
-            setup = """#!/usr/bin/env python 
+            setup = """#!/usr/bin/env python
 
 import os, sys
 from setuptools import setup, Extension
@@ -97,7 +97,7 @@ setup(name='mathsat', version='0.1',
             c_body = c_body.replace(key, subst)
             with open(os.path.join(self.python_bindings_dir, "mathsat_python_wrap.c"), "w") as f:
                 f.write(c_body)
-        
+
         SolverInstaller.run_python("./setup.py build", self.python_bindings_dir)
         if self.os_name == "windows":
             SolverInstaller.mv(os.path.join(libdir, "mathsat.dll"), self.bindings_dir)
